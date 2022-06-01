@@ -1,0 +1,11 @@
+.fc-scroller.fc-day-grid-container {
+    overflow-y: hidden !important;
+}
+
+.fc-agendaWeek-view tr {
+    height: 2.5em;
+}
+
+.fc-agendaDay-view tr {
+    height: 2.5em;
+}

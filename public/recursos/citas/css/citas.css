@@ -1,0 +1,8 @@
+.horario_flotante {
+    display: inline-block;
+    float: left;
+    border-right: 1px solid black;
+    padding-right: 1em;
+    margin-right: 1em;
+    font-family: monospace;
+}

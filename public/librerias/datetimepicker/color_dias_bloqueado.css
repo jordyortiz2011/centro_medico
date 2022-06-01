@@ -1,0 +1,9 @@
+tr td.disabled {
+	
+	background-color: #ffd3d3 !important; 	
+}
+
+td.highlight {
+    background-color: red;
+    border: 1px blue solid;
+} 

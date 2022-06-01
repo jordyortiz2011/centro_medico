@@ -1,0 +1,159 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Registrar extends MY_Controller {
+    
+    public function __construct()
+    {
+        parent::__construct();
+        // Force SSL
+        //$this->force_ssl();        
+        
+        //forzar autentificacion si no está logueado
+         $this->require_min_level(1); //nivel 1 requerido para acceder
+         
+         $this->load->helper('form');
+        
+    }
+	
+	public function index(){
+		redirect();
+	}
+  
+  
+  // --------------------------------------------------------------
+    /**
+     * muestra formulario para registro
+     * @param  -_-  
+     */   
+    public function form_registrar()
+    {
+        
+         // Method should not be directly accessible                      
+         if( $this->verify_role('admin') )
+        {
+
+
+            $this->load->model('reutilizables/Model_cie10_categorias');
+            $lst_categorias = $this->Model_cie10_categorias->listado_cie10_cat();
+
+
+            $data = array(
+                'lst_categorias' =>  $lst_categorias,
+            );
+
+            $this->load->view('gestores/codigos_cie10/vista_registrar' , $data );
+        }
+  
+    }
+	
+	
+	   /**
+     * Obtiene los datos del formulario Modulo Anuncio/Nuevo, los procesa, 
+     * valida, y los manda al modelo, para guardar en la BD
+     * Permiso: solo administradores    
+     * @param  -_-
+     * @return  -_- (carga  la vista de listado de usuarios)   
+     */       
+    public function procesa()
+    {
+        
+         // Method should not be directly accessible                      
+        if(  $this->auth_role == 'admin'    )
+        {
+            $post = $this->input->post(); 		
+			//print_r($post)         ; exit;
+           
+            //establecer reglas de validacion:           
+            $this->validacion_reglas($post);
+          
+            //Si es falso , regresa de nuevo al formulario
+            if( $this->form_validation->run() == FALSE )
+            {                                          
+               //$this->load->view('formulario/vista_formulario');
+			  $this->form_registrar();
+			    
+            }
+            else {				
+				//print_r($post); echo "pase validación"; exit;
+
+                //Concatenar
+                $post['text_codigo'] = $post['text_codigo_tres'] . $post['text_codigo'];
+
+				//guardar en la BD
+				$this->load->model('gestores/codigos_cie10/Model_registrar');
+                $result =  $this->Model_registrar->guardar_cie10($post);
+                
+                 if ($result == true ) {
+
+                     //registro Correcto, guardamos variable de sesión  flash para mostrar  mensaje (sweetalert)
+                     $this->session->set_flashdata('estado_registro', 'registrado');
+	            		
+						//redirección de acuerdo al boton
+						if($post['btn_subir'] == 'permanecer') 
+	            			redirect('gestores/codigos_cie10/registrar/form_registrar', 'refresh');
+						else if($post['btn_subir'] == 'listar') 
+							redirect('gestores/codigos_cie10/listar/listar_codigos', 'refresh');
+						else
+	            			redirect('gestores/codigos_cie10/listar/listar_codigos', 'refresh');
+                    
+                                     
+                 }else {
+                 	
+                    //registro Correcto, entonces mostramos mensaje y cargamos de nuevo vista registrar  
+	                    $this->session->set_flashdata('registro_error', true);
+                        redirect('gestores/codigos_cie10/listar/listar_codigos', 'refresh');
+                 }                 
+                
+                                
+            }//fin de form_validation->run()
+        
+        }
+    
+    }
+
+
+     /**
+     * Reglas de validacion para formulario        
+     */       
+    private function validacion_reglas ($post)
+    {               
+        //carga la libreria para validar formulario               
+        $this->load->library('form_validation');
+		$this->config->set_item('language', 'spanish');
+
+		//print_r($post);
+        //$post['text_codigo'] = $post['text_codigo_tres'] . $post['text_codigo'];
+        //echo $post['text_codigo'] ;
+        //print_r($post);
+        //exit;
+        $_POST['text_codigo_nuevo'] = $post['text_codigo_tres'] . $post['text_codigo'];
+        
+         // ==== para el codigo =====
+        $this->form_validation->set_rules('text_codigo_nuevo', 'Código', 'required|trim|max_length[4]|is_unique[tbl_codigos_cie10.codigo_cie10]' ,
+										 //mensajes personalizados de cada regla de validación
+										 array(									               
+									                'is_unique'     => 'Este <b> %s </b> ya existe.'
+									           )
+										);
+
+        // ==== para descripcion =====
+        $this->form_validation->set_rules('text_descripcion', 'Descripción', 'required|trim|min_length[1]|max_length[60]|is_unique[tbl_codigos_cie10.descripcion_cie10]' ,
+            //mensajes personalizados de cada regla de validación
+            array(
+                'is_unique'     => 'Esta <b> %s </b> ya existe.'
+            )
+        );
+
+
+
+
+    }
+	
+	
+	
+
+ 
+    
+    
+}
