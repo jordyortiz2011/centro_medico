@@ -28,7 +28,7 @@ class Nueva extends MY_Controller {
      */   
     public function form_nueva()
     {
-        
+
          // Method should not be directly accessible                      
          if(  $this->auth_level == 9 || $this->auth_level == 5  )
         {
@@ -38,13 +38,12 @@ class Nueva extends MY_Controller {
 
             //ÚLTIMO DÍA para Datetimepicker (HOY + 1 Dia)
             $hoy            = new DateTime();	//fecha de hoy
-            $fecha_sumada   = $hoy->modify('+1 day');
-            $fecha_sumada   = $fecha_sumada->format('Y-m-d');
+            $fecha_hoy  = $hoy->format('Y-m-d');
 
             $data =
                 array(
-                        'lst_especialidades'     => $lst_especialidades, //Todos los datos correspondientes al último ciclo
-                        'fecha_sumada'           => $fecha_sumada
+                        'lst_especialidades'   => $lst_especialidades, //Todos los datos correspondientes al último ciclo
+                        'fecha_hoy'           => $fecha_hoy
 
                 );
 						  
@@ -83,20 +82,23 @@ class Nueva extends MY_Controller {
 
             }
             else {
-                //print_r($post)         ; exit;
+                //echo 'Guardar';print_r($post)         ; exit;
                 //guardar en la BD
 
                 //REGISTRAR EL PAGO
-                $this->load->model('pagos/Model_nuevo');
-                $result_pago =  $this->Model_nuevo->registrar_pago( $post);
+                $this->load->model('citas/Model_nueva');
+                $result_cita =  $this->Model_nueva->registrar_cita( $post);
 
-                if($result_pago) {
+                //var_dump($result_cita); exit;
+
+                if($result_cita) {
                     //registro Correcto, guardamos variable de sesión  flash para mostrar  mensaje (sweetalert)
                     $this->session->set_flashdata('estado_registro', 'registrado');
+                    $this->session->set_flashdata('num_cita', $result_cita);
 
                     //redirección de acuerdo al boton
                     if($post['btn_subir'] == 'permanecer')
-                        redirect('pagos/nuevo/form_nuevo', 'refresh');
+                        redirect('citas/nueva/form_nueva', 'refresh');
                     else if($post['btn_subir'] == 'listar')
                         redirect('pagos/listar/listar_pagos', 'refresh');
                     else if($post['btn_subir'] == 'editar_matricula')
@@ -133,32 +135,35 @@ class Nueva extends MY_Controller {
         $this->config->set_item('language', 'spanish');
 
         //===== para ID MATRICULA   ======
-        $this->form_validation->set_rules('hidden_id_matricula', 'ID matricula', 'required|is_numeric' );
+        $this->form_validation->set_rules('hidden_id_paciente', 'ID Paciente', 'required|is_numeric' );
 
 
-        //===== para RECIBO NÚMERO   ======
-        $this->form_validation->set_rules('text_num_recibo', 'Número de recibo', 'required|trim|min_length[4]|max_length[20]|is_unique[tbl_pagos.numero_recibo_pago]' ,
+        //===== para specialidades   ======
+        $this->form_validation->set_rules('select_especialidad', 'Especialidad', 'required|trim' ,
             //mensajes personalizados de cada regla de validación
             array(
                 'is_unique'     => 'Esta <b> %s </b> ya existe.'
             )
         );
-        //===== para RECIBO FECHA   ======
-        $this->form_validation->set_rules('text_fecha_recibo', 'Fecha de recibo', 'required|trim|callback_validacion_fecha' ,
+
+        //===== para profesionales  ======
+        $monto_matricula =
+            $this->form_validation->set_rules('select_profesionales', 'Profesionales', 'required|trim' ,
+                //mensajes personalizados de cada regla de validación
+                array(
+                    //'is_unique'     => 'Esta <b> %s </b> ya existe.' ,
+                )
+            );
+
+        //===== para fecha cita  ======
+        $this->form_validation->set_rules('text_fechacita', 'Fecha Cita', 'required|trim|callback_validacion_fecha' ,
             //mensajes personalizados de cada regla de validación
             array(
                 //'is_unique'     => 'Esta <b> %s </b> ya existe.' ,
                 'validacion_fecha'     => ' <b> %s </b> no valida',
             )
         );
-        //===== para RECIBO MONTO   ======
-        $monto_matricula =
-        $this->form_validation->set_rules('text_monto_recibo', 'Monto de recibo', 'required|trim|greater_than_equal_to[1]' ,
-            //mensajes personalizados de cada regla de validación
-            array(
-                //'is_unique'     => 'Esta <b> %s </b> ya existe.' ,
-            )
-        );
+
 
 
 

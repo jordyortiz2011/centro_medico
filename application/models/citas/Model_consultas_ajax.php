@@ -117,14 +117,15 @@ class Model_consultas_ajax extends CI_Model {
             ->select("*")
             ->from("tbl_horarios")
             ->join('tbl_consultorios' , 'tbl_consultorios.id_consultorio = tbl_horarios.id_consultorio_hora' ,'LEFT' )
+            ->join('users' , 'users.user_id = tbl_horarios.id_profesional_hora' ,'LEFT' )
+            ->where('id_especialidad_hora' ,$id_especialidad )
             ->where('id_profesional_hora' ,$id_profesional )
+            ->group_by('users.user_id')
             ->order_by('dias_semana_hora','asc')
             ->order_by('hora_inicio_hora','asc')
-
         ;
 
-        echo $this->db->get_compiled_select(); exit;
-
+        //echo $this->db->get_compiled_select(); exit;
 
         $query = $this->db->get();
 

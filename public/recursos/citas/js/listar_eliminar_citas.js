@@ -1,0 +1,187 @@
+$(document).ready(function () {
+    
+   //registrar los select2        
+  $('#filtrado_tipo_emplea').select2({
+             //placeholder: 'Select an option',
+            // theme: "bootstrap4",
+             minimumResultsForSearch: 7, 
+   });    
+   // $('.select2-container > span').css('width', '100%'); 
+    // $('span.select2-selection span.select2-selection__arrow').addClass('hola');
+    // $('span.select2-selection span.select2-selection__arrow').css({display: ''}); 
+
+    $('#text_fechacita').datetimepicker({
+        format: 'YYYY-MM-DD',
+        locale: 'es',
+        //viewMode: 'years',
+        useCurrent: false , //rellenar el input con la fecha actual
+        //defaultDate: false,
+        icons: {
+            time: "fa fa-clock-o",
+            date: "fa fa-calendar",
+            up: "fa fa-arrow-up",
+            down: "fa fa-arrow-down",
+            previous: 'fa fa-arrow-left',
+            next: 'fa fa-arrow-right',
+        }
+    });
+   
+   
+    
+	
+    // ================== IMPORTANTE =========================================== 
+    //llamar a la funcion listar tabla
+     listar_tabla();
+
+  
+   function listar_tabla () { 
+       $('#listado_pacientes').DataTable({
+               destroy : true,   //destruir la tabla y volver a crearla al hacer cambios
+                language: lenguajeDatatable, 
+                lengthChange : true,  //deshabilita select , para mostrar cantidad de resultados
+                processing: true, 
+                serverSide: true,                              
+                
+        	     ajax:{
+        		            url : BASE_URL + "citas/listar/listar_citas_ajax", // json datasource
+        		            type: "post",  // type of method  , by default would be get
+        		            error: function(xhr, ajaxOptions, thrownError){  // error handling code
+        		             		 $("#listado_pacientes").css("display","none");
+        		             		 console.log(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+        	            	 		}		
+                    	 } , 
+                
+                order: [[ 6, "desc" ]] , //ordenar por defecto columna 4 (fecha registro)
+        	     
+        		 columns: [
+        						{ data: 'paciente' } ,
+                                { data: {
+                                         _:    "fecha_cita.mostrar_fecha",
+                                         sort: "fecha_cita.ordenar_fecha"
+                                     }
+                                 } ,
+                                { data: 'orden' } ,
+                                { data: 'consultorio' } ,
+        						{ data: 'especialidad' } ,
+                                { data: 'estado_cita' } ,
+                                { data: {
+                                         _:    "fecha_registro.mostrar_fecha",
+                                         sort: "fecha_registro.ordenar_fecha"
+                                     }
+                                 } ,
+        	                    { data: null, orderable: false ,render: function ( data, type, row ) {
+        				                
+        				                 // Opciones de la tabla                                                
+                                            return "<div class='action-buttons' id='" + data.id_registro  + "' + > "+                                                    
+                                                     /*"<a class='btn btn-outline-info' href='"+  BASE_URL+ "gestores/pacientes/editar/form_editar/" + data.id_registro +"'"+
+                                                      " data-toggle='tooltip' title='Editar'>"+
+                                                         "<i class=' fa fa-pencil bigger-150'></i>"+
+                                                    "</a> &nbsp;"+   */
+                                                    "<a class='btn btn-outline-danger  delete ' data-toggle='tooltip' title='Eliminar' href='#'>"+
+                                                        "<i class='fa fa-trash-o bigger-150'></i>"+
+                                                    "</a>"+
+                                               
+                                            "</div>" ;                 			
+        				                },
+        	                   }
+        		          ] ,
+        		          
+        		fnDrawCallback: function( oSettings ) {
+                                $('div.dataTables_length select').removeClass("form-control-sm");
+                            }
+        	 }); //fin de datatable
+        	 
+        	 //remover select 
+        	 
+                            	 
+     }; //fin de funcion listar tabla;
+	 
+          //PARA LOS FILTRADOS DE LA TABLA
+// ================== Filtrado ==================================    
+     
+     //configuraciones para el filtrado 
+     
+          
+        
+      //Columna no visible  
+      $('#text_fechacita').on("dp.change", function (evt) {
+           console.log( this.value );    
+           oTable = $('#listado_pacientes').DataTable();
+           oTable.columns(2).search(this.value);
+           oTable.draw();
+        });
+        
+   
+
+	 
+	    //PARA ELIMINAR DESDE LA TABLA
+    /***********--DELETE--***************/
+    $("#listado_pacientes").on('click', 'a.delete',function(e)
+    {
+      e.preventDefault();
+
+       id =  $(this).parent().attr('id'); 
+       dataString = 'id='+ id;
+       var b=$(this).parent().parent().parent();
+        
+       //alert(id); exit;
+        
+       swal({
+              title: "¿Estás seguro que deseas eliminar este Registro?",
+              text: "Se eliminará de forma permanente",
+              type: "warning",
+              showCancelButton: true,
+              confirmButtonColor: "#DD6B55",
+              confirmButtonText: "Si, Eliminar",
+              cancelButtonText: "No, Cancelar",
+              closeOnConfirm: false,
+              closeOnCancel: false
+            },
+            function(isConfirm){
+              if (isConfirm) {
+                //proceder a eliminar:
+                 $.ajax({
+                    type: "POST",
+                    url: BASE_URL + "gestores/pacientes/listar/eliminar_paciente_fisico/"+id ,
+                    data: dataString,
+                    cache: false,
+                    success: function(e)
+                    {
+                        console.log(e);
+                        
+                         switch (String(e) ) {  
+                             
+                             case 'eliminar_ok':                                   
+                                   swal("¡Eliminado!", "Registro Eliminado.", "success"); break;
+                             case 'registro_usado' :
+                                    swal("¡Cancelado!", "El registro está siendo usado.", "error");break;
+                             case 'eliminar_error' : 
+                                    swal("¡Cancelado!", "Error al eliminar", "error"); break;
+                             case 'sin_permiso' :
+                                 swal("¡Cancelado!", "Usted no tiene permiso para eliminar", "error"); break;
+                             default:
+                                    swal("¡Cancelado!", "Error al eliminar", "error"); break;
+                          } 
+                        
+                                             
+                        
+                         listar_tabla();
+                      
+                    },
+                    error: function(xhr, ajaxOptions, thrownError) {
+                            alert(thrownError + "\r\n" + xhr.statusText + "\r\n" + xhr.responseText);
+                            swal("¡Cancelado!", "Registro no fue eliminado", "error");
+                            
+                    }
+                   });
+          //return false;
+               
+              } else {
+                     swal("¡Cancelado!", "Registro no fue eliminado", "error");
+              }
+            });
+    });
+	 
+
+	
+});//fin document

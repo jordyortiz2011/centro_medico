@@ -140,12 +140,13 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 
                             <!-- Columna Izquierda -->
                             <div class="col-12 col-md-4" >
-                                <form id="form_buscar_paciente">
+                                <form id="form_cita" action="<?= base_url('citas/nueva/procesa') ?>" method="POST">
+                                    <input type="hidden" name="hidden_id_paciente" id="hidden_id_paciente"  >
                                     <div class="form-group">
                                         <label for="select_especialidad">Especialidad <span class="text-red">(*) </span></label>
                                         <div>
                                             <select class="select2 form-control form-control-lg" style="width: 100%;" id="select_especialidad" name="select_especialidad"   >
-                                                <option>Seleccione</option>
+                                                <option value="">Seleccione</option>
                                                 <?php
                                                     foreach ($lst_especialidades as $especialidad) {
                                                         echo "<option value='$especialidad->id_especialidad'>$especialidad->nombre_espe</option>";
@@ -159,7 +160,7 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
                                         <label for="select_profesionales">Profesional <span class="text-red">(*) </span></label>
                                         <div>
                                             <select class="select2 form-control form-control-lg" id="select_profesionales" name="select_profesionales"  >
-                                                <option>Seleccione</option>
+                                                <option value="">Seleccione</option>
                                             </select>
                                         </div>
                                     </div>
@@ -167,13 +168,9 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
                                     <div class="form-group">
                                         <label for="text_fechacita">Fecha cita <span class="text-red">(*) </span></label>
                                         <div>
-                                            <input type="text" class="form-control" id="text_fechacita" name="text_fechacita" autocomplete="on" placeholder="">
+                                            <input type="text" class="form-control" id="text_fechacita" name="text_fechacita" autocomplete="off" placeholder="">
                                         </div>
                                     </div>
-
-
-
-
 
 
                                 </form>
@@ -181,19 +178,25 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 
                             <!-- Columna Derecha -->
                             <div class="col-12 col-md-8" id="bloque_horarios_profesionales" >
-
                                 <!-- <div class="form-group horario_flotante" >
                                    <h5>LUIS, VELA</h5>
                                         + Lun 07:00 a 13:00hrs : Consultorio 1<br>
                                         + Mie 07:00 a 13:00hrs : Consultorio 1<br>
                                         + Jue 07:00 a 13:00hrs : Consultorio 1<br>
                                 </div> -->
-
                             </div>
                         </div>
                         <br>
 
 
+                    <div class="form-group text-center">
+                       <!-- <button type="submit"   class="btn btn-outline-primary" name="btn_subir" value="permanecer">
+                            <i class="fa fa-floppy-o" aria-hidden="true"></i> Guardar y <br>Permanecer
+                        </button>-->
+                        <button type="submit" class="btn btn-outline-primary" id="btn_form_cita"  value="listar">
+                            <i class="fa fa-floppy-o" aria-hidden="true"></i> Guardar y <br> Listar
+                        </button>
+                    </div>
 
 
 
@@ -212,7 +215,7 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 
 
 <script>
-    var FECHA_SUMADA  = '<?= $fecha_sumada ?>';
+    var FECHA_HOY  = '<?= $fecha_hoy ?>';
 </script>
 
 <?php
@@ -254,10 +257,12 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 <?php
 //para mensaje de estado de registro
 $estado_registro = $this->session->flashdata('estado_registro');
+
 // var_dump($estado_registro);
 if ($estado_registro == 'registrado' && isset($estado_registro)) {?>
     <script>
-        swal( 'Registro Correcto','', "success");
+        var NUM_CITA =  <?php echo $this->session->flashdata('num_cita') ?>;
+        swal( 'Registro Correcto','Su número de cita es: ' + NUM_CITA, "success");
     </script>
 <?php }else if ($estado_registro == 'actualizado' && isset($estado_registro) ) { ?>
     <script>

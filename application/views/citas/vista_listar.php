@@ -2,7 +2,7 @@
 <?php
     //ruta por defecto es public/
      $data = array (
-                    'titulo_header' => 'Listar Pagos ',
+                    'titulo_header' => 'Listar Citas',
                     'css'           => array (
                     						   //Select2
                     						   'librerias/select2/dist/css/select2.min.css',
@@ -12,7 +12,10 @@
                     					   		//dataTable(bs4)
                     					   		 //'librerias/datatables(bs4)_1.10.16/dataTables.bootstrap4.min.css'  ,  
                     					   		 //dataTable(1.10.16 min)
-                    					   		 'librerias/datatables_1.10.16/datatables.min.css'  ,                    		
+                    					   		 'librerias/datatables_1.10.16/datatables.min.css'  ,
+                                                //datetimepicker
+                                                'librerias/datetimepicker/bootstrap-datetimepicker.min.css',
+                                                'librerias/datetimepicker/color_dias_bloqueado.css',
                     					   		
                     						   
                                                                                                             
@@ -26,9 +29,9 @@
 
 <!-- lista de Título y  Navegación     -->
 <?php  $data = array (  
-                        'navegacion'    => array ('Principal'  => '' , 'Pagos' => '' , 'Listar recibos' => '#' ),
-                        'titulo'        => 'Pagos: Listar recibos' ,
-                        'titulo_icono'  => 'fa fa-usd',
+                        'navegacion'    => array ('Citas'  => '' , 'Listar' => '#' ),
+                        'titulo'        => 'Listar citas' ,
+                        'titulo_icono'  => 'fa fa-hospital-o',
                         'descripcion'   => '' 
                         
                     ) ;
@@ -63,38 +66,13 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 		                	 </div>			                
 					    </div>
 					    <div  class="card-body collapse show" id="card_filtros" >
-					    	<!-- Filtro-->
+					    	<!-- Filtro tipo de colegio-->
 					    	<div class="form-group row">
-	                          <label class="col-md-3 form-control-label">Ciclo</label>
-	                          <div class="col-md-5">
-	                            <!--<select class="select2"  name="filtrado_ciclo" id="filtrado_ciclo" data-width="100%">
-									<option value="" selected="">Todos</option>
-									<?php foreach ($lst_ciclos as $ciclo) {?>
-		                                  <option value="<?= $ciclo->id_ciclo ?>"><?= $ciclo->codigo_ciclo ?></option>
-		                            <?php } ?>
-	                            </select> -->
-                                  <?= $select_ciclos ?>
-	                          </div>                       
+	                          <label class="col-sm-2 form-control-label">Fecha Cita</label>
+	                          <div class="col-sm-3">
+                                  <input type="text" class="form-control" id="text_fechacita" name="text_fechacita" autocomplete="off" placeholder="">
+                              </div>
 	                        </div>
-
-                            <div class="row justify-content-end">
-                                <div class="col-md-3">
-                                    <div class="btn-group" role="group">
-                                        <button id="btnGroupDrop1" type="button" class="btn btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                            Exportar
-                                        </button>
-                                        <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                                            <a class="dropdown-item" href="#" id="btn_exportar_excel" >
-                                                <i class="text-green fa fa-file-excel-o "></i> <b>EXCEL</b>
-                                            </a>
-                                            <a class="dropdown-item" href="#" id="btn_exportar_pdf">
-                                                <i class="text-red fa fa-file-pdf-o "></i> <b>PDF</b>
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                            </div>
 					       
 					    </div>
 					</div>
@@ -116,21 +94,19 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
 
                     <div class="card-body">
                     	<div class="table-responsive">
-                    		 <table id="listado_recibos" class="display nowrap table table-striped table-bordered">
+                    		 <table id="listado_pacientes" class="display nowrap table table-striped table-bordered">
 	      					<!--cabesera de la tabla-->
 		       					<thead>
-		            				<tr>
-                                        <th>id registro</th>
-                                        <th>Cód <br> Matricula</th>
-                                        <th>Estudiante</th>
-                                        <th>DNI</th>
-										<th>Número <br> Recibo</th>
-                                        <th>Monto <br> Recibo </th>
-                                        <th>Fecha <br> Recibo</th>
-										<th>Fecha de <br> registro</th>
-										<th>Acciones</th>
-                                        <th>id ciclo</th>
-                                    </tr>
+		            				<tr>							
+										<th>PACIENTE</th>
+                                        <th>FECHA CITA</th>
+                                        <th>N° ORDEN CITA</th>
+										<th>CONSULTORIO</th>
+                                        <th>ESPECIALIDAD</th>
+										<th>ESTADO CITA</th>
+                                        <th>FECHA REGISTRO</th>
+										<th>Acciones</th>           
+		          					  </tr>
 		      			        </thead>
 		       					<!--cuerpo de la tabla-->
 								<tbody>	
@@ -163,31 +139,34 @@ $this->load->view('template/d_breadcrumb.php',  $data) ; ?>
                     					   //datatable                                       
 	                                      'librerias/datatables_1.10.16/datatables.min.js' ,
 	                                      'librerias/datatables_1.10.16/datatables_lenguaje.js',
+                                        //datetimepicker
+                                        'librerias/datetimepicker/moment.min.js',
+                                        'librerias/datetimepicker/bootstrap-datetimepicker.min.js',
+                                        'librerias/datetimepicker/locale/es.js',
 	                                      
-	                                      'recursos/pagos/js/listar_eliminar_recibos.js' ,
+	                                      'recursos/citas/js/listar_eliminar_citas.js' ,
                                        )
                 );  
     
     $this->load->view('template/f_footer', $data);
 ?>
-<?php
-//para mensaje de estado de registro
-$estado_registro = $this->session->flashdata('estado_registro');
-// var_dump($estado_registro);
-if ($estado_registro == 'registrado' && isset($estado_registro)) {?>
-    <script>
-        swal( 'Registro Correcto','', "success");
-    </script>
-<?php }else if ($estado_registro == 'actualizado' && isset($estado_registro) ) { ?>
-    <script>
-        swal( 'Registro Actualizado','', "success");
-    </script>
+<?php 
+	//para mensaje de estado de registro
+	 $estado_registro = $this->session->flashdata('estado_registro');
+	// var_dump($estado_registro); 
+	if ($estado_registro == 'registrado' && isset($estado_registro)) {?>     
+     <script>
+         swal( 'Registro Correcto','', "success");         
+     </script>    
+<?php }else if ($estado_registro == 'actualizado' && isset($estado_registro) ) { ?>    
+	 <script>
+         swal( 'Registro Actualizado','', "success");         
+     </script> 
 <?php } else if ($estado_registro == 'sin_actualizar' && isset($estado_registro) ){ ?>
-    <script>
-        swal( 'Registro sin actualizar','', "info");
-    </script>
-<?php } else if ($estado_registro == 'registro_error' && isset($estado_registro) ) { ?>
-    <script>
-        swal( 'Error al registrar','', "error");
-    </script>
-<?php }  ?>
+	<script>
+         swal( 'Registro sin actualizar','', "info");         
+     </script> 
+<?php } ?>
+
+
+     

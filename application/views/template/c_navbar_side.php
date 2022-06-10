@@ -26,7 +26,7 @@
 
                               <li><a href="<?= base_url('citas/nueva/form_nueva') ?>">Nueva</a></li>
 
-                          <li><a href="#">Listar</a></li>
+                          <li><a href="<?= base_url('citas/listar/listar_citas') ?>">Listar</a></li>
                       </ul>
                   </li>
                   <?php } ?>

@@ -59,6 +59,36 @@ class Model_consultorios extends CI_Model {
         }
     }
 
+    /**
+     * Obtiene un registro , de acuerdo a su id
+     * @param  (int)id_registro
+     * @return (Objeto) todos los datos correspondientes al registro
+     *  */
+    public function obtener_consultorio_xCita($id_profesional, $id_especialidad, $fechacita)
+    {
+        $fecha          =   new DateTime($fechacita);
+        $dia            =   $fecha->format('w');
+        $dia_fullCalendar = '['. $dia .']';
+
+        $query = $this
+            ->db
+            ->from('tbl_horarios')
+            ->where('id_profesional_hora =', $id_profesional)
+            ->where('id_especialidad_hora =', $id_especialidad)
+            ->where('dias_semana_hora =', $dia_fullCalendar)
+        ;
+
+        //ejectua la consulta
+        $query = $this->db->get();
+
+        if (!$query) {
+            $error = $this->db->error(); // Has keys 'code' and 'message'
+            echo "$error[message]";
+        } else {
+            return $query->row();
+        }
+    }
+
 
 
 }

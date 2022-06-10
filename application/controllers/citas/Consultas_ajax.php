@@ -130,9 +130,6 @@ class Consultas_ajax extends MY_Controller {
                 $data_dias[] = $lst_horarios;
 
             }
-
-
-
         }
 
 
@@ -157,12 +154,13 @@ class Consultas_ajax extends MY_Controller {
         //print_r($post);exit;
 
         $this->load->model('citas/Model_consultas_ajax');
-        $horario = $this->Model_consultas_ajax->buscar_horario_un_profesional($id_especialidad, $id_profesional);
-
+        $profesionales = $this->Model_consultas_ajax->buscar_horario_un_profesional($id_especialidad, $id_profesional);
 
         $data           = array(); //para el select de los profesionales
         $data_dias = array();     //para mostrar horario y consultorio del profesional
-        if($horario) {
+
+        if($profesionales) {
+
             foreach ($profesionales as $prof) {
                 $profesional['nombres'] = $prof->apellido_pat_user . ' ' .$prof->apellido_mat_user . ', '  . $prof->nombres_user;
                 $profesional['id_user'] = $prof->user_id;
@@ -180,8 +178,14 @@ class Consultas_ajax extends MY_Controller {
 
                 $dias_atencion =   $this->Model_consultas_ajax->buscar_horarios_profesionales($prof->user_id);
                 $horarios = array();
+                $dias_atencion_array = array();
                 if($dias_atencion) {
                     foreach ($dias_atencion as $dia){
+
+                        //remove the first and last character: Ejmp: [1] => 1
+                        $dia_extraido = substr($dia->dias_semana_hora, 1, -1);
+                        $dias_atencion_array[] = (int)$dia_extraido;
+
                         $dia_string = fecha_obtener_nombre_dia_abbr($dia->dias_semana_hora);
                         $horario['horario_consultorio'] = $dia_string . " " . $dia->hora_inicio_hora . " - " . $dia->hora_fin_hora ;
                         $horario['horario_consultorio'] .= " | " .  $dia->nombre_consul;
@@ -191,19 +195,21 @@ class Consultas_ajax extends MY_Controller {
                 }
 
                 $lst_horarios['horarios'] = $horarios;
-
                 $data_dias[] = $lst_horarios;
-
             }
+
+            //Para excluir deshabilitar días donde no atiende el doctor
+            //https://getdatepicker.com/4/Options/#daysofweekdisabled
+            $dias_semana                = [0,1,2,3,4,5,6] ; // 0= Domingo
+            $dias_semana_laborables     =  array_diff($dias_semana, $dias_atencion_array);
 
 
 
         }
 
-
         $respt->select_profesionales = $data;
-
         $respt->listado_horarios = $data_dias;
+        $respt->dias_atencion = $dias_semana_laborables;
 
 
         echo json_encode($respt);
